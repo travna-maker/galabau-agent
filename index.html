@@ -1,86 +1,141 @@
 <!DOCTYPE html>
 <html lang="de">
-<head>
-  <meta charset="UTF-8">
-  <title>GalaBau KI-Meisterassistent</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    body { font-family: system-ui, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; background: #f5f5f5; }
-    h1 { font-size: 1.6rem; margin-bottom: 0.3rem; }
-    .sub { color: #555; margin-bottom: 1rem; }
-    textarea { width: 100%; min-height: 160px; padding: 10px; box-sizing: border-box; resize: vertical; font-family: inherit; }
-    button { margin-top: 10px; padding: 10px 18px; border: none; cursor: pointer; border-radius: 4px; font-size: 0.95rem; }
-    #sendBtn { background: #007bff; color: white; }
-    #sendBtn:disabled { opacity: 0.6; cursor: wait; }
-    .response-box { margin-top: 20px; padding: 15px; background: #ffffff; border-radius: 6px; white-space: pre-wrap; border: 1px solid #ddd; }
-    .label { font-weight: 600; margin-top: 15px; margin-bottom: 4px; }
-  </style>
-</head>
-<body>
-  <h1>GalaBau KI-Meisterassistent</h1>
-  <div class="sub">
-    Gib deinen Auftrag bitte so ein:<br>
-    <code>AUFTRAG: ...<br>DATEN: ...<br>AUSGABE ERWÜNSCHT: ...</code>
-  </div>
+  <head>
+    <meta charset="UTF-8" />
+    <title>GalaBau KI-Meisterassistent</title>
+    <style>
+      body {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        background-color: #f5f5f5;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        max-width: 900px;
+        margin: 30px auto;
+        background: #ffffff;
+        padding: 24px 28px 32px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+      }
+      h1 {
+        margin-top: 0;
+        font-size: 26px;
+      }
+      .hint {
+        font-size: 14px;
+        color: #555;
+        margin-bottom: 16px;
+      }
+      label {
+        display: block;
+        font-weight: 600;
+        margin: 18px 0 6px;
+      }
+      textarea {
+        width: 100%;
+        min-height: 180px;
+        resize: vertical;
+        padding: 10px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        font-family: inherit;
+        font-size: 14px;
+      }
+      button {
+        margin-top: 16px;
+        padding: 10px 18px;
+        border-radius: 6px;
+        border: none;
+        background-color: #007bff;
+        color: white;
+        font-size: 15px;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #0062cc;
+      }
+      #answer-box {
+        margin-top: 20px;
+        padding: 12px 14px;
+        border-radius: 6px;
+        border: 1px solid #ddd;
+        background-color: #fafafa;
+        white-space: pre-wrap;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>GalaBau KI-Meisterassistent</h1>
+      <div class="hint">
+        Gib deinen Auftrag bitte so ein:<br />
+        <b>AUFTRAG:</b> …<br />
+        <b>DATEN:</b> …<br />
+        <b>AUSGABE ERWÜNSCHT:</b> …
+      </div>
 
-  <div class="label">Eingabe</div>
-  <textarea id="input" placeholder="Beispiel:
-AUFTRAG: Angebot Rollrasen erstellen
-DATEN: 85 m², leichte Hanglage, alte Grasnarbe entfernen, Region Kassel
-AUSGABE ERWÜNSCHT: Detailliertes Angebot mit Kurzfassung, Materialliste und Arbeitszeit"></textarea>
+      <label for="user-input">Eingabe</label>
+      <textarea id="user-input">
+AUFTRAG: Monatliches Pflegeangebot erstellen
+DATEN: 600 m² Garten, Rasenmähen, Hecken schneiden (50 m), Unkraut entfernen, zweimal monatlich
+AUSGABE ERWÜNSCHT: Monatlicher Pauschalpreis + Einzelposten</textarea
+      >
 
-  <button id="sendBtn">An Agent senden</button>
+      <button id="send-button">An Agent senden</button>
 
-  <div class="label">Antwort</div>
-  <div id="output" class="response-box">Hier erscheint die Antwort des KI-Meisterassistenten.</div>
+      <label for="answer-box">Antwort</label>
+      <div id="answer-box">
+Hier erscheint die Antwort des KI-Meisterassistenten.
+      </div>
+    </div>
 
- <script>
-  const textarea = document.getElementById("user-input");
-  const button = document.getElementById("send-button");
-  const answerBox = document.getElementById("answer-box");
+    <script>
+      const textarea = document.getElementById("user-input");
+      const button = document.getElementById("send-button");
+      const answerBox = document.getElementById("answer-box");
 
-  // Wichtig: exakt der gleiche Pfad wie in server.js (app.post("/galabau-agent", ...))
-  const API_URL = "https://galabau-agent.onrender.com";
+      // Muss zu server.js passen: app.post("/galabau-agent", ...)
+      const API_URL = "/galabau-agent";
 
-  async function sendToAgent() {
-    const userInput = textarea.value.trim();
+      async function sendToAgent() {
+        const userInput = textarea.value.trim();
 
-    if (!userInput) {
-      answerBox.textContent = "Bitte gib zuerst einen Auftrag ein.";
-      return;
-    }
+        if (!userInput) {
+          answerBox.textContent = "Bitte gib zuerst einen Auftrag ein.";
+          return;
+        }
 
-    answerBox.textContent = "Der KI-Meisterassistent arbeitet ...";
+        answerBox.textContent = "Der KI-Meisterassistent arbeitet ...";
 
-    try {
-      const response = await fetch(API_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        // ganz wichtig: der Body heißt userInput – genauso wie in server.js erwartet
-        body: JSON.stringify({ userInput }),
-      });
+        try {
+          const response = await fetch(API_URL, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ userInput }),
+          });
 
-      if (!response.ok) {
-        const text = await response.text();
-        console.error("Serverfehler:", response.status, text);
-        throw new Error("Serverfehler: " + response.status);
+          if (!response.ok) {
+            const text = await response.text();
+            console.error("Serverfehler:", response.status, text);
+            throw new Error("Serverfehler: " + response.status);
+          }
+
+          const data = await response.json();
+          answerBox.textContent =
+            data.reply || "Keine Antwort vom KI-Meisterassistenten erhalten.";
+        } catch (err) {
+          console.error("Fehler im Frontend:", err);
+          answerBox.textContent =
+            "Fehler bei der Anfrage. Bitte später erneut versuchen.";
+        }
       }
 
-      const data = await response.json();
-      answerBox.textContent = data.reply || "Keine Antwort erhalten.";
-    } catch (err) {
-      console.error("Fehler im Frontend:", err);
-      answerBox.textContent =
-        "Fehler bei der Anfrage. Bitte später erneut versuchen.";
-    }
-  }
-
-  button.addEventListener("click", sendToAgent);
-</script>
-
-</body>
+      button.addEventListener("click", sendToAgent);
+    </script>
+  </body>
 </html>
-
-
