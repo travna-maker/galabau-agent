@@ -34,46 +34,53 @@ AUSGABE ERWÜNSCHT: Detailliertes Angebot mit Kurzfassung, Materialliste und Arb
   <div class="label">Antwort</div>
   <div id="output" class="response-box">Hier erscheint die Antwort des KI-Meisterassistenten.</div>
 
-  <script>
-    const API_URL = "https://galabau-agent.onrender.com";
+ <script>
+  const textarea = document.getElementById("user-input");
+  const button = document.getElementById("send-button");
+  const answerBox = document.getElementById("answer-box");
 
-    const inputEl = document.getElementById("input");
-    const outputEl = document.getElementById("output");
-    const sendBtn = document.getElementById("sendBtn");
+  // Wichtig: exakt der gleiche Pfad wie in server.js (app.post("/galabau-agent", ...))
+  const API_URL = "https://galabau-agent.onrender.com";
 
-    async function sendToAgent() {
-      const text = inputEl.value.trim();
-      if (!text) {
-        alert("Bitte einen Auftrag eingeben.");
-        return;
-      }
+  async function sendToAgent() {
+    const userInput = textarea.value.trim();
 
-      sendBtn.disabled = true;
-      sendBtn.textContent = "Wird verarbeitet...";
-      outputEl.textContent = "Der Agent arbeitet ...";
-
-      try {
-        const res = await fetch(API_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userInput: text })
-        });
-
-        if (!res.ok) throw new Error("Fehler vom Server: " + res.status);
-
-        const data = await res.json();
-        outputEl.textContent = data.reply || "Keine Antwort erhalten.";
-      } catch (err) {
-        console.error(err);
-        outputEl.textContent = "Fehler bei der Anfrage. Bitte später erneut versuchen.";
-      } finally {
-        sendBtn.disabled = false;
-        sendBtn.textContent = "An Agent senden";
-      }
+    if (!userInput) {
+      answerBox.textContent = "Bitte gib zuerst einen Auftrag ein.";
+      return;
     }
 
-    sendBtn.addEventListener("click", sendToAgent);
-  </script>
+    answerBox.textContent = "Der KI-Meisterassistent arbeitet ...";
+
+    try {
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        // ganz wichtig: der Body heißt userInput – genauso wie in server.js erwartet
+        body: JSON.stringify({ userInput }),
+      });
+
+      if (!response.ok) {
+        const text = await response.text();
+        console.error("Serverfehler:", response.status, text);
+        throw new Error("Serverfehler: " + response.status);
+      }
+
+      const data = await response.json();
+      answerBox.textContent = data.reply || "Keine Antwort erhalten.";
+    } catch (err) {
+      console.error("Fehler im Frontend:", err);
+      answerBox.textContent =
+        "Fehler bei der Anfrage. Bitte später erneut versuchen.";
+    }
+  }
+
+  button.addEventListener("click", sendToAgent);
+</script>
+
 </body>
 </html>
+
 
