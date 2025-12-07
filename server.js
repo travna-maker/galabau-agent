@@ -11,6 +11,20 @@ const __dirname = path.dirname(__filename);
 dotenv.config();
 
 const app = express();
+// Einfacher Passwortschutz
+const PASSWORD = process.env.PAGE_PASSWORD || "Klei!2025";
+
+app.use((req, res, next) => {
+  const auth = req.headers.authorization;
+
+  if (!auth || auth !== PASSWORD) {
+    res.setHeader("WWW-Authenticate", "Basic");
+    return res.status(401).send("Passwort erforderlich");
+  }
+  
+  next();
+});
+
 app.use(cors());
 app.use(express.json());
 
@@ -53,4 +67,5 @@ app.get("/", (req, res) => {
 app.listen(process.env.PORT || 3000, () => {
   console.log("GalaBau-Agent läuft auf Port " + (process.env.PORT || 3000));
 });
+
 
